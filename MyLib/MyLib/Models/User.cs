@@ -14,10 +14,24 @@ namespace MyLib.Models
         public string Login { get; set; }              // login
         public string Password { get; set; }           // password
 
-        // Проверка ролей
-        public bool IsAdmin => Role == "Admin";
-        public bool IsManager => Role == "Manager";
-        public bool IsAuthorizedCustomer => Role == "AuthorizedCustomer";
-        public bool IsGuest => false;
+        public bool IsAdmin
+        {
+            get { return Role == "Администратор"; }
+        }
+
+        public bool IsManager
+        {
+            get { return Role == "Менеджер"; }
+        }
+
+        public bool IsAuthorizedCustomer
+        {
+            get { return Role == "Авторизированный клиент"; }
+        }
+
+        public bool IsGuest
+        {
+            get { return Role == "Гость"; }
+        }
     }
 }

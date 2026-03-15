@@ -53,7 +53,7 @@ namespace Main_Form
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка авторизации: {ex.Message}", "Ошибка",
+                MessageBox.Show("Ошибка авторизации: " + ex.Message, "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

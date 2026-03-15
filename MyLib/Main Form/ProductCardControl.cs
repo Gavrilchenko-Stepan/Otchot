@@ -46,14 +46,9 @@ namespace Main_Form
         {
             _product = product;
 
-            // Категория товара
             lblCategory.Text = product.Category;
-
-            // Наименование товара
             lblName.Text = product.Name;
-
-            // Скидка (только число с процентом)
-            lblDiscount.Text = $"{product.CurrentDiscount}%";
+            lblDiscount.Text = product.CurrentDiscount + "%";
 
             if (product.DiscountMoreThan15)
             {
@@ -66,22 +61,18 @@ namespace Main_Form
                 lblDiscount.Font = new Font(lblDiscount.Font, FontStyle.Regular);
             }
 
-            // Описание, производитель, поставщик
-            lblDescription.Text = $"Описание товара: {product.Description ?? "—"}";
-            lblManufacturer.Text = $"Производитель: {product.Manufacturer}";
-            lblSupplier.Text = $"Поставщик: {product.Supplier}";
+            string description = product.Description;
+            if (string.IsNullOrEmpty(description))
+                description = "—";
 
-            // Единица измерения и количество
-            lblUnit.Text = $"Единица измерения: {product.Unit}";
-            lblStock.Text = $"Количество на складе: {product.StockQuantity}";
+            lblDescription.Text = "Описание товара: " + description;
+            lblManufacturer.Text = "Производитель: " + product.Manufacturer;
+            lblSupplier.Text = "Поставщик: " + product.Supplier;
+            lblUnit.Text = "Единица измерения: " + product.Unit;
+            lblStock.Text = "Количество на складе: " + product.StockQuantity;
 
-            // Обновление цены
             UpdatePriceDisplay(product);
-
-            // Подсветка фона
             ApplyBackgroundColor(product);
-
-            // Загрузка фото
             LoadProductImage(product.Photo);
         }
 
@@ -91,43 +82,37 @@ namespace Main_Form
 
             if (product.HasDiscount)
             {
-                Label lblOldPrice = new Label
-                {
-                    Text = $"{product.Price:F2} ₽",
-                    Font = new Font("Times New Roman", 10F, FontStyle.Strikeout),
-                    ForeColor = Color.Red,
-                    AutoSize = true,
-                    Location = new Point(lblPrice.Right + 5, lblPrice.Top),
-                    Tag = "priceLabel",
-                    BackColor = Color.Transparent
-                };
+                Label lblOldPrice = new Label();
+                lblOldPrice.Text = product.Price.ToString("F2") + " ₽";
+                lblOldPrice.Font = new Font("Times New Roman", 10F, FontStyle.Strikeout);
+                lblOldPrice.ForeColor = Color.Red;
+                lblOldPrice.AutoSize = true;
+                lblOldPrice.Location = new Point(lblPrice.Right + 5, lblPrice.Top);
+                lblOldPrice.Tag = "priceLabel";
+                lblOldPrice.BackColor = Color.Transparent;
 
-                Label lblNewPrice = new Label
-                {
-                    Text = $"{product.FinalPrice:F2} ₽",
-                    Font = new Font("Times New Roman", 12F, FontStyle.Bold),
-                    ForeColor = Color.Black,
-                    AutoSize = true,
-                    Location = new Point(lblOldPrice.Right + 10, lblPrice.Top - 2),
-                    Tag = "priceLabel",
-                    BackColor = Color.Transparent
-                };
+                Label lblNewPrice = new Label();
+                lblNewPrice.Text = product.FinalPrice.ToString("F2") + " ₽";
+                lblNewPrice.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+                lblNewPrice.ForeColor = Color.Black;
+                lblNewPrice.AutoSize = true;
+                lblNewPrice.Location = new Point(lblOldPrice.Right + 10, lblPrice.Top - 2);
+                lblNewPrice.Tag = "priceLabel";
+                lblNewPrice.BackColor = Color.Transparent;
 
                 panel2.Controls.Add(lblOldPrice);
                 panel2.Controls.Add(lblNewPrice);
             }
             else
             {
-                Label lblPriceValue = new Label
-                {
-                    Text = $"{product.Price:F2} ₽",
-                    Font = new Font("Times New Roman", 12F, FontStyle.Bold),
-                    ForeColor = Color.Black,
-                    AutoSize = true,
-                    Location = new Point(lblPrice.Right + 5, lblPrice.Top - 2),
-                    Tag = "priceLabel",
-                    BackColor = Color.Transparent
-                };
+                Label lblPriceValue = new Label();
+                lblPriceValue.Text = product.Price.ToString("F2") + " ₽";
+                lblPriceValue.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+                lblPriceValue.ForeColor = Color.Black;
+                lblPriceValue.AutoSize = true;
+                lblPriceValue.Location = new Point(lblPrice.Right + 5, lblPrice.Top - 2);
+                lblPriceValue.Tag = "priceLabel";
+                lblPriceValue.BackColor = Color.Transparent;
 
                 panel2.Controls.Add(lblPriceValue);
             }
@@ -135,10 +120,10 @@ namespace Main_Form
 
         private void RemoveOldPriceLabels()
         {
-            var toRemove = new List<Control>();
+            var toRemove = new System.Collections.Generic.List<Control>();
             foreach (Control ctrl in panel2.Controls)
             {
-                if (ctrl.Tag?.ToString() == "priceLabel")
+                if (ctrl.Tag != null && ctrl.Tag.ToString() == "priceLabel")
                 {
                     toRemove.Add(ctrl);
                 }
@@ -161,7 +146,7 @@ namespace Main_Form
             }
             else if (product.DiscountMoreThan15)
             {
-                backColor = ColorTranslator.FromHtml("#2E8B57");
+                backColor = Color.FromArgb(46, 139, 87); // #2E8B57
             }
             else
             {
@@ -174,7 +159,7 @@ namespace Main_Form
 
             foreach (Control ctrl in panel2.Controls)
             {
-                if (ctrl.Tag?.ToString() != "priceLabel")
+                if (ctrl.Tag == null || ctrl.Tag.ToString() != "priceLabel")
                 {
                     ctrl.BackColor = backColor;
                 }
@@ -233,7 +218,8 @@ namespace Main_Form
 
         private void ProductCardControl_Click(object sender, EventArgs e)
         {
-            CardClicked?.Invoke(this, _product);
+            if (CardClicked != null)
+                CardClicked(this, _product);
         }
     }
 }

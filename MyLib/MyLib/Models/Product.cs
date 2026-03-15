@@ -21,10 +21,24 @@ namespace MyLib.Models
         public string Description { get; set; }        // description
         public string Photo { get; set; }              // photo
 
-        // Вычисляемые свойства
-        public decimal FinalPrice => Price * (100 - CurrentDiscount) / 100;
-        public bool HasDiscount => CurrentDiscount > 0;
-        public bool OutOfStock => StockQuantity <= 0;
-        public bool DiscountMoreThan15 => CurrentDiscount > 15;
+        public decimal FinalPrice
+        {
+            get { return Price * (100 - CurrentDiscount) / 100; }
+        }
+
+        public bool HasDiscount
+        {
+            get { return CurrentDiscount > 0; }
+        }
+
+        public bool OutOfStock
+        {
+            get { return StockQuantity <= 0; }
+        }
+
+        public bool DiscountMoreThan15
+        {
+            get { return CurrentDiscount > 15; }
+        }
     }
 }

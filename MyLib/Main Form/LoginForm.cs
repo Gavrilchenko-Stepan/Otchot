@@ -43,7 +43,9 @@ namespace Main_Form
 
                 if (user != null)
                 {
-                    OpenMainForm(user);
+                    Program.CurrentUser = user;
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
                 }
                 else
                 {
@@ -60,16 +62,9 @@ namespace Main_Form
 
         private void btnGuest_Click(object sender, EventArgs e)
         {
-            User guest = _userRepository.GetGuestUser();
-            OpenMainForm(guest);
-        }
-
-        private void OpenMainForm(User user)
-        {
-            var productRepo = new ProductRepository(_database);
-            var mainForm = new MainForm(user, productRepo);
-            mainForm.Show();
-            this.Hide();
+            Program.CurrentUser = _userRepository.GetGuestUser();
+            this.DialogResult = DialogResult.OK;
+            this.Close();
         }
     }
 }

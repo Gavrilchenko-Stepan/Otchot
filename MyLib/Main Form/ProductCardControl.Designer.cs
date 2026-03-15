@@ -45,44 +45,50 @@ namespace Main_Form
             ((System.ComponentModel.ISupportInitialize)(this.pbFoto)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
-
+            // 
             // lblCategory
+            // 
             this.lblCategory.AutoSize = true;
             this.lblCategory.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Bold);
             this.lblCategory.Location = new System.Drawing.Point(3, 3);
             this.lblCategory.Name = "lblCategory";
-            this.lblCategory.Size = new System.Drawing.Size(122, 16);
+            this.lblCategory.Size = new System.Drawing.Size(122, 17);
             this.lblCategory.TabIndex = 1;
             this.lblCategory.Text = "Категория товара";
-
+            // 
             // lblDescription
+            // 
             this.lblDescription.Font = new System.Drawing.Font("Times New Roman", 9F);
             this.lblDescription.Location = new System.Drawing.Point(3, 21);
             this.lblDescription.MaximumSize = new System.Drawing.Size(300, 40);
             this.lblDescription.Name = "lblDescription";
-            this.lblDescription.Size = new System.Drawing.Size(300, 24);
+            this.lblDescription.Size = new System.Drawing.Size(300, 40);
             this.lblDescription.TabIndex = 2;
             this.lblDescription.Text = "Описание товара:";
-
+            // 
             // lblManufacturer
+            // 
             this.lblManufacturer.AutoSize = true;
             this.lblManufacturer.Font = new System.Drawing.Font("Times New Roman", 9F);
-            this.lblManufacturer.Location = new System.Drawing.Point(3, 43);
+            this.lblManufacturer.Location = new System.Drawing.Point(3, 60);
             this.lblManufacturer.Name = "lblManufacturer";
-            this.lblManufacturer.Size = new System.Drawing.Size(89, 14);
+            this.lblManufacturer.Size = new System.Drawing.Size(89, 15);
             this.lblManufacturer.TabIndex = 3;
             this.lblManufacturer.Text = "Производитель:";
-
+            // 
             // lblSupplier
+            // 
             this.lblSupplier.AutoSize = true;
             this.lblSupplier.Font = new System.Drawing.Font("Times New Roman", 9F);
-            this.lblSupplier.Location = new System.Drawing.Point(3, 58);
+            this.lblSupplier.Location = new System.Drawing.Point(3, 76);
             this.lblSupplier.Name = "lblSupplier";
-            this.lblSupplier.Size = new System.Drawing.Size(67, 14);
+            this.lblSupplier.Size = new System.Drawing.Size(67, 15);
             this.lblSupplier.TabIndex = 4;
             this.lblSupplier.Text = "Поставщик:";
-
+            // 
             // panel2
+            // 
+            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel2.Controls.Add(this.lblName);
             this.panel2.Controls.Add(this.lblStock);
             this.panel2.Controls.Add(this.lblUnit);
@@ -93,69 +99,79 @@ namespace Main_Form
             this.panel2.Controls.Add(this.lblManufacturer);
             this.panel2.Location = new System.Drawing.Point(174, 4);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(307, 119);
+            this.panel2.Size = new System.Drawing.Size(307, 142);
             this.panel2.TabIndex = 6;
-
+            // 
             // lblName
+            // 
             this.lblName.AutoSize = true;
             this.lblName.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Bold);
             this.lblName.Location = new System.Drawing.Point(147, 3);
             this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(150, 16);
+            this.lblName.Size = new System.Drawing.Size(150, 17);
             this.lblName.TabIndex = 8;
             this.lblName.Text = "Наименование товара";
-
+            // 
             // lblStock
+            // 
             this.lblStock.AutoSize = true;
             this.lblStock.Font = new System.Drawing.Font("Times New Roman", 9F);
-            this.lblStock.Location = new System.Drawing.Point(3, 101);
+            this.lblStock.Location = new System.Drawing.Point(3, 123);
             this.lblStock.Name = "lblStock";
-            this.lblStock.Size = new System.Drawing.Size(118, 14);
+            this.lblStock.Size = new System.Drawing.Size(118, 15);
             this.lblStock.TabIndex = 7;
             this.lblStock.Text = "Количество на складе:";
-
+            // 
             // lblUnit
+            // 
             this.lblUnit.AutoSize = true;
             this.lblUnit.Font = new System.Drawing.Font("Times New Roman", 9F);
-            this.lblUnit.Location = new System.Drawing.Point(3, 86);
+            this.lblUnit.Location = new System.Drawing.Point(3, 107);
             this.lblUnit.Name = "lblUnit";
-            this.lblUnit.Size = new System.Drawing.Size(108, 14);
+            this.lblUnit.Size = new System.Drawing.Size(108, 15);
             this.lblUnit.TabIndex = 6;
             this.lblUnit.Text = "Единица измерения:";
-
+            // 
             // lblPrice
+            // 
             this.lblPrice.AutoSize = true;
             this.lblPrice.Font = new System.Drawing.Font("Times New Roman", 9F);
-            this.lblPrice.Location = new System.Drawing.Point(3, 72);
+            this.lblPrice.Location = new System.Drawing.Point(3, 92);
             this.lblPrice.Name = "lblPrice";
-            this.lblPrice.Size = new System.Drawing.Size(35, 14);
+            this.lblPrice.Size = new System.Drawing.Size(35, 15);
             this.lblPrice.TabIndex = 5;
             this.lblPrice.Text = "Цена:";
-
+            // 
             // pbFoto
+            // 
             this.pbFoto.Location = new System.Drawing.Point(12, 4);
             this.pbFoto.Name = "pbFoto";
-            this.pbFoto.Size = new System.Drawing.Size(156, 119);
+            this.pbFoto.Size = new System.Drawing.Size(156, 142);
+            this.pbFoto.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pbFoto.TabIndex = 7;
             this.pbFoto.TabStop = false;
-
+            // 
             // panel1
+            // 
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.lblDiscount);
             this.panel1.Location = new System.Drawing.Point(481, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(89, 119);
+            this.panel1.Size = new System.Drawing.Size(98, 142);
             this.panel1.TabIndex = 8;
-
+            // 
             // lblDiscount
+            // 
             this.lblDiscount.AutoSize = true;
             this.lblDiscount.Font = new System.Drawing.Font("Times New Roman", 15.75F);
-            this.lblDiscount.Location = new System.Drawing.Point(7, 50);
+            this.lblDiscount.Location = new System.Drawing.Point(5, 54);
             this.lblDiscount.Name = "lblDiscount";
             this.lblDiscount.Size = new System.Drawing.Size(75, 23);
             this.lblDiscount.TabIndex = 0;
             this.lblDiscount.Text = "Скидка";
-
+            // 
             // ProductCardControl
+            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -164,13 +180,14 @@ namespace Main_Form
             this.Controls.Add(this.panel2);
             this.Font = new System.Drawing.Font("Times New Roman", 8.25F);
             this.Name = "ProductCardControl";
-            this.Size = new System.Drawing.Size(574, 127);
+            this.Size = new System.Drawing.Size(582, 149);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbFoto)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
+
         }
     }
 }

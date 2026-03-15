@@ -15,30 +15,39 @@ namespace Main_Form
     public partial class ProductCardControl : UserControl
     {
         private Product _product;
+        private Color _originalBackColor;
         public event EventHandler<Product> CardClicked;
+        public event EventHandler<Product> CardDoubleClicked;
 
         public ProductCardControl()
         {
             InitializeComponent();
+
             this.Click += ProductCardControl_Click;
+            this.DoubleClick += ProductCardControl_DoubleClick;
 
             foreach (Control ctrl in this.Controls)
             {
                 ctrl.Click += (s, e) => ProductCardControl_Click(this, e);
+                ctrl.DoubleClick += (s, e) => ProductCardControl_DoubleClick(this, e);
             }
 
-            panel2.Click += (s, e) => ProductCardControl_Click(this, e);
             panel1.Click += (s, e) => ProductCardControl_Click(this, e);
+            panel1.DoubleClick += (s, e) => ProductCardControl_DoubleClick(this, e);
+            panel2.Click += (s, e) => ProductCardControl_Click(this, e);
+            panel2.DoubleClick += (s, e) => ProductCardControl_DoubleClick(this, e);
             pbFoto.Click += (s, e) => ProductCardControl_Click(this, e);
-
-            foreach (Control ctrl in panel2.Controls)
-            {
-                ctrl.Click += (s, e) => ProductCardControl_Click(this, e);
-            }
+            pbFoto.DoubleClick += (s, e) => ProductCardControl_DoubleClick(this, e);
 
             foreach (Control ctrl in panel1.Controls)
             {
                 ctrl.Click += (s, e) => ProductCardControl_Click(this, e);
+                ctrl.DoubleClick += (s, e) => ProductCardControl_DoubleClick(this, e);
+            }
+            foreach (Control ctrl in panel2.Controls)
+            {
+                ctrl.Click += (s, e) => ProductCardControl_Click(this, e);
+                ctrl.DoubleClick += (s, e) => ProductCardControl_DoubleClick(this, e);
             }
         }
 
@@ -61,10 +70,7 @@ namespace Main_Form
                 lblDiscount.Font = new Font(lblDiscount.Font, FontStyle.Regular);
             }
 
-            string description = product.Description;
-            if (string.IsNullOrEmpty(description))
-                description = "—";
-
+            string description = product.Description ?? "—";
             lblDescription.Text = "Описание товара: " + description;
             lblManufacturer.Text = "Производитель: " + product.Manufacturer;
             lblSupplier.Text = "Поставщик: " + product.Supplier;
@@ -74,6 +80,8 @@ namespace Main_Form
             UpdatePriceDisplay(product);
             ApplyBackgroundColor(product);
             LoadProductImage(product.Photo);
+
+            _originalBackColor = this.BackColor;
         }
 
         private void UpdatePriceDisplay(Product product)
@@ -139,19 +147,12 @@ namespace Main_Form
         private void ApplyBackgroundColor(Product product)
         {
             Color backColor;
-
             if (product.OutOfStock)
-            {
                 backColor = Color.LightBlue;
-            }
             else if (product.DiscountMoreThan15)
-            {
-                backColor = Color.FromArgb(46, 139, 87); // #2E8B57
-            }
+                backColor = Color.FromArgb(46, 139, 87);
             else
-            {
                 backColor = Color.White;
-            }
 
             this.BackColor = backColor;
             panel2.BackColor = backColor;
@@ -160,24 +161,29 @@ namespace Main_Form
             foreach (Control ctrl in panel2.Controls)
             {
                 if (ctrl.Tag == null || ctrl.Tag.ToString() != "priceLabel")
-                {
                     ctrl.BackColor = backColor;
-                }
             }
-
             foreach (Control ctrl in panel1.Controls)
-            {
                 ctrl.BackColor = backColor;
-            }
         }
 
         private void LoadProductImage(string photoPath)
         {
-            if (!string.IsNullOrEmpty(photoPath) && File.Exists(photoPath))
+            // Если путь не задан – показываем заглушку
+            if (string.IsNullOrEmpty(photoPath))
+            {
+                SetDefaultImage();
+                return;
+            }
+
+            // Формируем полный путь: папка программы + ProductPhotos + имя файла
+            string fullPath = Path.Combine(Application.StartupPath, "ProductPhotos", photoPath);
+
+            if (File.Exists(fullPath))
             {
                 try
                 {
-                    using (var fs = new FileStream(photoPath, FileMode.Open, FileAccess.Read))
+                    using (var fs = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
                     {
                         pbFoto.Image = Image.FromStream(fs);
                     }
@@ -195,12 +201,12 @@ namespace Main_Form
 
         private void SetDefaultImage()
         {
-            string defaultImagePath = Path.Combine(Application.StartupPath, "picture.png");
-            if (File.Exists(defaultImagePath))
+            string defaultPath = Path.Combine(Application.StartupPath, "ProductPhotos", "picture.png");
+            if (File.Exists(defaultPath))
             {
                 try
                 {
-                    using (var fs = new FileStream(defaultImagePath, FileMode.Open, FileAccess.Read))
+                    using (var fs = new FileStream(defaultPath, FileMode.Open, FileAccess.Read))
                     {
                         pbFoto.Image = Image.FromStream(fs);
                     }
@@ -216,10 +222,19 @@ namespace Main_Form
             }
         }
 
+        public void SetSelected(bool selected)
+        {
+            this.BackColor = selected ? Color.LightYellow : _originalBackColor;
+        }
+
         private void ProductCardControl_Click(object sender, EventArgs e)
         {
-            if (CardClicked != null)
-                CardClicked(this, _product);
+            CardClicked?.Invoke(this, _product);
+        }
+
+        private void ProductCardControl_DoubleClick(object sender, EventArgs e)
+        {
+            CardDoubleClicked?.Invoke(this, _product);
         }
     }
 }

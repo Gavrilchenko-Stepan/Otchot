@@ -24,11 +24,7 @@ namespace Main_Form
         {
             InitializeComponent();
 
-            if (order == null)
-                _order = new Order();
-            else
-                _order = order;
-
+            _order = order ?? new Order();
             var db = new Database();
             _orderRepo = new OrderRepository(db);
             _pickupRepo = new PickupPointRepository(db);
@@ -36,8 +32,7 @@ namespace Main_Form
             LoadPickupPoints();
             LoadStatuses();
 
-            if (_order.Id > 0)
-                LoadOrderData();
+            if (_order.Id > 0) LoadOrderData();
         }
 
         private void LoadPickupPoints()
@@ -51,9 +46,7 @@ namespace Main_Form
 
         private void LoadStatuses()
         {
-            cmbStatus.Items.Add("Новый");
-            cmbStatus.Items.Add("Завершен");
-            cmbStatus.Items.Add("Отменен");
+            cmbStatus.Items.AddRange(new[] { "Новый", "Завершен", "Отменен" });
             cmbStatus.SelectedIndex = 0;
         }
 
@@ -61,22 +54,11 @@ namespace Main_Form
         {
             txtOrderNumber.Text = _order.OrderNumber.ToString();
             dtpOrderDate.Value = _order.OrderDate;
-
+            chkDeliveryDate.Checked = _order.DeliveryDate.HasValue;
             if (_order.DeliveryDate.HasValue)
-            {
-                chkDeliveryDate.Checked = true;
                 dtpDeliveryDate.Value = _order.DeliveryDate.Value;
-            }
-            else
-            {
-                chkDeliveryDate.Checked = false;
-                dtpDeliveryDate.Enabled = false;
-            }
-
             if (_order.PickupPointId.HasValue)
                 cmbPickupPoint.SelectedValue = _order.PickupPointId.Value;
-
-            txtPickupCode.Text = _order.PickupCode;
             cmbStatus.SelectedItem = _order.Status;
         }
 
@@ -89,43 +71,41 @@ namespace Main_Form
         {
             if (string.IsNullOrWhiteSpace(txtOrderNumber.Text) ||
                 cmbPickupPoint.SelectedItem == null ||
-                string.IsNullOrWhiteSpace(txtPickupCode.Text) ||
                 cmbStatus.SelectedItem == null)
             {
-                MessageBox.Show("Заполните все обязательные поля.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Заполните все обязательные поля.", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            int orderNumber;
-            if (!int.TryParse(txtOrderNumber.Text, out orderNumber))
+            if (!int.TryParse(txtOrderNumber.Text, out int orderNumber))
             {
-                MessageBox.Show("Номер заказа должен быть числом.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Номер заказа должен быть числом.", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             _order.OrderNumber = orderNumber;
             _order.OrderDate = dtpOrderDate.Value;
-
-            if (chkDeliveryDate.Checked)
-                _order.DeliveryDate = dtpDeliveryDate.Value;
-            else
-                _order.DeliveryDate = null;
-
+            _order.DeliveryDate = chkDeliveryDate.Checked ? dtpDeliveryDate.Value : (DateTime?)null;
             _order.PickupPointId = (int)cmbPickupPoint.SelectedValue;
-            _order.PickupCode = txtPickupCode.Text.Trim();
             _order.Status = cmbStatus.SelectedItem.ToString();
 
-            if (_order.Id == 0)
+            try
             {
-                _orderRepo.AddOrder(_order);
-            }
-            else
-            {
-                _orderRepo.UpdateOrder(_order);
-            }
+                if (_order.Id == 0)
+                    _orderRepo.AddOrder(_order);
+                else
+                    _orderRepo.UpdateOrder(_order);
 
-            DialogResult = DialogResult.OK;
-            Close();
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при сохранении: " + ex.Message, "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)

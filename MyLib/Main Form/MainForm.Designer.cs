@@ -13,9 +13,8 @@ namespace Main_Form
         private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.Button btnOrders;
         private System.Windows.Forms.Button btnAddProduct;
+        private System.Windows.Forms.Button btnDeleteProduct;
         private System.Windows.Forms.PictureBox pbLogo;
-
-        // Новые метки
         private System.Windows.Forms.Label lblSortBy;
         private System.Windows.Forms.Label lblFilterSupplier;
         private System.Windows.Forms.Label lblSearch;
@@ -29,6 +28,7 @@ namespace Main_Form
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnExit = new System.Windows.Forms.Button();
             this.lblUserFIO = new System.Windows.Forms.Label();
@@ -37,16 +37,18 @@ namespace Main_Form
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.btnOrders = new System.Windows.Forms.Button();
             this.btnAddProduct = new System.Windows.Forms.Button();
-            this.pbLogo = new System.Windows.Forms.PictureBox();
+            this.btnDeleteProduct = new System.Windows.Forms.Button();
             this.lblSortBy = new System.Windows.Forms.Label();
             this.lblFilterSupplier = new System.Windows.Forms.Label();
             this.lblSearch = new System.Windows.Forms.Label();
+            this.pbLogo = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbLogo)).BeginInit();
             this.SuspendLayout();
             // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.AutoScroll = true;
+            this.flowLayoutPanel1.BackColor = System.Drawing.Color.Chartreuse;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(12, 100);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(960, 450);
@@ -55,7 +57,7 @@ namespace Main_Form
             // btnExit
             // 
             this.btnExit.Font = new System.Drawing.Font("Times New Roman", 10F);
-            this.btnExit.Location = new System.Drawing.Point(780, 20);
+            this.btnExit.Location = new System.Drawing.Point(882, 22);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(90, 30);
             this.btnExit.TabIndex = 9;
@@ -77,14 +79,13 @@ namespace Main_Form
             // 
             this.cmbSortBy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbSortBy.Font = new System.Drawing.Font("Times New Roman", 10F);
-            this.cmbSortBy.FormattingEnabled = true;
             this.cmbSortBy.Items.AddRange(new object[] {
             "Без сортировки",
             "Цена (возрастание)",
             "Цена (убывание)",
             "Количество (возрастание)",
             "Количество (убывание)"});
-            this.cmbSortBy.Location = new System.Drawing.Point(120, 22);
+            this.cmbSortBy.Location = new System.Drawing.Point(87, 20);
             this.cmbSortBy.Name = "cmbSortBy";
             this.cmbSortBy.Size = new System.Drawing.Size(130, 23);
             this.cmbSortBy.TabIndex = 2;
@@ -94,8 +95,7 @@ namespace Main_Form
             // 
             this.cmbFilterSupplier.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbFilterSupplier.Font = new System.Drawing.Font("Times New Roman", 10F);
-            this.cmbFilterSupplier.FormattingEnabled = true;
-            this.cmbFilterSupplier.Location = new System.Drawing.Point(260, 22);
+            this.cmbFilterSupplier.Location = new System.Drawing.Point(237, 20);
             this.cmbFilterSupplier.Name = "cmbFilterSupplier";
             this.cmbFilterSupplier.Size = new System.Drawing.Size(130, 23);
             this.cmbFilterSupplier.TabIndex = 4;
@@ -105,7 +105,7 @@ namespace Main_Form
             // 
             this.txtSearch.Font = new System.Drawing.Font("Times New Roman", 10F);
             this.txtSearch.ForeColor = System.Drawing.Color.Gray;
-            this.txtSearch.Location = new System.Drawing.Point(400, 22);
+            this.txtSearch.Location = new System.Drawing.Point(381, 22);
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(150, 23);
             this.txtSearch.TabIndex = 6;
@@ -114,29 +114,69 @@ namespace Main_Form
             // 
             // btnOrders
             // 
+            this.btnOrders.BackColor = System.Drawing.Color.MediumSpringGreen;
             this.btnOrders.Font = new System.Drawing.Font("Times New Roman", 10F);
-            this.btnOrders.Location = new System.Drawing.Point(560, 20);
+            this.btnOrders.Location = new System.Drawing.Point(548, 20);
             this.btnOrders.Name = "btnOrders";
             this.btnOrders.Size = new System.Drawing.Size(90, 30);
             this.btnOrders.TabIndex = 7;
             this.btnOrders.Text = "Заказы";
-            this.btnOrders.UseVisualStyleBackColor = true;
+            this.btnOrders.UseVisualStyleBackColor = false;
             this.btnOrders.Click += new System.EventHandler(this.BtnOrders_Click);
             // 
             // btnAddProduct
             // 
             this.btnAddProduct.Font = new System.Drawing.Font("Times New Roman", 10F);
-            this.btnAddProduct.Location = new System.Drawing.Point(660, 20);
+            this.btnAddProduct.Location = new System.Drawing.Point(644, 20);
             this.btnAddProduct.Name = "btnAddProduct";
             this.btnAddProduct.Size = new System.Drawing.Size(110, 30);
             this.btnAddProduct.TabIndex = 8;
             this.btnAddProduct.Text = "Добавить товар";
-            this.btnAddProduct.UseVisualStyleBackColor = true;
             this.btnAddProduct.Click += new System.EventHandler(this.BtnAddProduct_Click);
+            // 
+            // btnDeleteProduct
+            // 
+            this.btnDeleteProduct.Font = new System.Drawing.Font("Times New Roman", 10F);
+            this.btnDeleteProduct.Location = new System.Drawing.Point(760, 22);
+            this.btnDeleteProduct.Name = "btnDeleteProduct";
+            this.btnDeleteProduct.Size = new System.Drawing.Size(110, 30);
+            this.btnDeleteProduct.TabIndex = 12;
+            this.btnDeleteProduct.Text = "Удалить товар";
+            this.btnDeleteProduct.Click += new System.EventHandler(this.btnDeleteProduct_Click);
+            // 
+            // lblSortBy
+            // 
+            this.lblSortBy.AutoSize = true;
+            this.lblSortBy.Font = new System.Drawing.Font("Times New Roman", 9F);
+            this.lblSortBy.Location = new System.Drawing.Point(84, 5);
+            this.lblSortBy.Name = "lblSortBy";
+            this.lblSortBy.Size = new System.Drawing.Size(72, 15);
+            this.lblSortBy.TabIndex = 15;
+            this.lblSortBy.Text = "Сортировка:";
+            // 
+            // lblFilterSupplier
+            // 
+            this.lblFilterSupplier.AutoSize = true;
+            this.lblFilterSupplier.Font = new System.Drawing.Font("Times New Roman", 9F);
+            this.lblFilterSupplier.Location = new System.Drawing.Point(234, 5);
+            this.lblFilterSupplier.Name = "lblFilterSupplier";
+            this.lblFilterSupplier.Size = new System.Drawing.Size(67, 15);
+            this.lblFilterSupplier.TabIndex = 14;
+            this.lblFilterSupplier.Text = "Поставщик:";
+            // 
+            // lblSearch
+            // 
+            this.lblSearch.AutoSize = true;
+            this.lblSearch.Font = new System.Drawing.Font("Times New Roman", 9F);
+            this.lblSearch.Location = new System.Drawing.Point(378, 4);
+            this.lblSearch.Name = "lblSearch";
+            this.lblSearch.Size = new System.Drawing.Size(42, 15);
+            this.lblSearch.TabIndex = 13;
+            this.lblSearch.Text = "Поиск:";
             // 
             // pbLogo
             // 
-            this.pbLogo.Image = global::Main_Form.Properties.Resources.Icon;
+            this.pbLogo.Image = ((System.Drawing.Image)(resources.GetObject("pbLogo.Image")));
             this.pbLogo.Location = new System.Drawing.Point(12, 12);
             this.pbLogo.Name = "pbLogo";
             this.pbLogo.Size = new System.Drawing.Size(58, 50);
@@ -144,41 +184,12 @@ namespace Main_Form
             this.pbLogo.TabIndex = 0;
             this.pbLogo.TabStop = false;
             // 
-            // lblSortBy
-            // 
-            this.lblSortBy.AutoSize = true;
-            this.lblSortBy.Font = new System.Drawing.Font("Times New Roman", 9F);
-            this.lblSortBy.Location = new System.Drawing.Point(120, 5);
-            this.lblSortBy.Name = "lblSortBy";
-            this.lblSortBy.Size = new System.Drawing.Size(72, 15);
-            this.lblSortBy.TabIndex = 1;
-            this.lblSortBy.Text = "Сортировка:";
-            // 
-            // lblFilterSupplier
-            // 
-            this.lblFilterSupplier.AutoSize = true;
-            this.lblFilterSupplier.Font = new System.Drawing.Font("Times New Roman", 9F);
-            this.lblFilterSupplier.Location = new System.Drawing.Point(260, 5);
-            this.lblFilterSupplier.Name = "lblFilterSupplier";
-            this.lblFilterSupplier.Size = new System.Drawing.Size(67, 15);
-            this.lblFilterSupplier.TabIndex = 3;
-            this.lblFilterSupplier.Text = "Поставщик:";
-            // 
-            // lblSearch
-            // 
-            this.lblSearch.AutoSize = true;
-            this.lblSearch.Font = new System.Drawing.Font("Times New Roman", 9F);
-            this.lblSearch.Location = new System.Drawing.Point(400, 5);
-            this.lblSearch.Name = "lblSearch";
-            this.lblSearch.Size = new System.Drawing.Size(42, 15);
-            this.lblSearch.TabIndex = 5;
-            this.lblSearch.Text = "Поиск:";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(984, 561);
+            this.Controls.Add(this.btnDeleteProduct);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.lblUserFIO);
             this.Controls.Add(this.btnExit);
@@ -192,6 +203,7 @@ namespace Main_Form
             this.Controls.Add(this.lblSortBy);
             this.Controls.Add(this.pbLogo);
             this.Font = new System.Drawing.Font("Times New Roman", 8.25F);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "Каталог товаров";
             this.Load += new System.EventHandler(this.MainForm_Load);

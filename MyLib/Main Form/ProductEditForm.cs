@@ -1,5 +1,6 @@
 ﻿using MyLib;
 using MyLib.Models;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +17,8 @@ namespace Main_Form
 {
     public partial class ProductEditForm : Form
     {
+        private static bool _isOpen = false;
+
         private Product _product;
         private ProductRepository _productRepo;
         private bool isNew;
@@ -23,45 +26,78 @@ namespace Main_Form
 
         public ProductEditForm(Product product)
         {
+            if (_isOpen)
+            {
+                MessageBox.Show("Окно редактирования уже открыто.", "Информация",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                DialogResult = DialogResult.Cancel;
+                Close();
+                return;
+            }
+
             InitializeComponent();
+            _isOpen = true;
+            this.FormClosed += (s, e) => _isOpen = false;
+
             _productRepo = new ProductRepository(new Database());
+            isNew = product == null;
+            _product = isNew ? new Product() : product;
 
-            isNew = (product == null);
+            if (!isNew) LoadProductData();
 
-            if (isNew)
-                _product = new Product();
-            else
-                _product = product;
+            lblId.Visible = !isNew;
+            txtId.Visible = !isNew;
 
-            if (!isNew)
-                LoadProductData();
+            this.Text = isNew ? "Добавление товара" : "Редактирование товара";
 
-            if (isNew)
-                this.Text = "Добавление товара";
-            else
-                this.Text = "Редактирование товара";
+            LoadCategoriesAndManufacturers();
+        }
+
+        private void LoadCategoriesAndManufacturers()
+        {
+            var products = _productRepo.GetAllProducts();
+            var categories = products.Select(p => p.Category).Where(c => !string.IsNullOrEmpty(c)).Distinct().OrderBy(c => c).ToArray();
+            cmbCategory.Items.Clear();
+            cmbCategory.Items.AddRange(categories);
+
+            var manufacturers = products.Select(p => p.Manufacturer).Where(m => !string.IsNullOrEmpty(m)).Distinct().OrderBy(m => m).ToArray();
+            cmbManufacturer.Items.Clear();
+            cmbManufacturer.Items.AddRange(manufacturers);
         }
 
         private void LoadProductData()
         {
+            txtId.Text = _product.Id.ToString();
             txtArticle.Text = _product.Article;
             txtName.Text = _product.Name;
             txtUnit.Text = _product.Unit;
             nudPrice.Value = _product.Price;
             txtSupplier.Text = _product.Supplier;
-            txtManufacturer.Text = _product.Manufacturer;
-            txtCategory.Text = _product.Category;
+            if (cmbManufacturer.Items.Contains(_product.Manufacturer))
+                cmbManufacturer.SelectedItem = _product.Manufacturer;
+            if (cmbCategory.Items.Contains(_product.Category))
+                cmbCategory.SelectedItem = _product.Category;
             nudDiscount.Value = _product.CurrentDiscount;
             nudStock.Value = _product.StockQuantity;
             txtDescription.Text = _product.Description;
 
-            if (!string.IsNullOrEmpty(_product.Photo) && File.Exists(_product.Photo))
+            // Загрузка фото
+            string photoPath = _product.Photo;
+            if (!string.IsNullOrEmpty(photoPath))
             {
-                try
+                string fullPath = Path.Combine(Application.StartupPath, "ProductPhotos", photoPath);
+                if (File.Exists(fullPath))
                 {
-                    pbFoto.Image = Image.FromFile(_product.Photo);
+                    try
+                    {
+                        pbFoto.Image = Image.FromFile(fullPath);
+                    }
+                    catch
+                    {
+                        SetDefaultImage();
+                    }
                 }
-                catch
+                else
                 {
                     SetDefaultImage();
                 }
@@ -74,7 +110,7 @@ namespace Main_Form
 
         private void SetDefaultImage()
         {
-            string defaultPath = Path.Combine(Application.StartupPath, "picture.png");
+            string defaultPath = Path.Combine(Application.StartupPath, "ProductPhotos", "picture.png");
             if (File.Exists(defaultPath))
             {
                 try
@@ -92,12 +128,33 @@ namespace Main_Form
             }
         }
 
+        private Image ResizeImage(Image image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                using (var wrapMode = new System.Drawing.Imaging.ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+            return destImage;
+        }
+
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtArticle.Text) ||
-                string.IsNullOrWhiteSpace(txtName.Text))
+            if (string.IsNullOrWhiteSpace(txtArticle.Text) || string.IsNullOrWhiteSpace(txtName.Text))
             {
-                MessageBox.Show("Артикул и наименование обязательны.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Артикул и наименование обязательны.", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -106,40 +163,60 @@ namespace Main_Form
             _product.Unit = txtUnit.Text.Trim();
             _product.Price = nudPrice.Value;
             _product.Supplier = txtSupplier.Text.Trim();
-            _product.Manufacturer = txtManufacturer.Text.Trim();
-            _product.Category = txtCategory.Text.Trim();
+            _product.Manufacturer = cmbManufacturer.SelectedItem?.ToString() ?? "";
+            _product.Category = cmbCategory.SelectedItem?.ToString() ?? "";
             _product.CurrentDiscount = (int)nudDiscount.Value;
             _product.StockQuantity = (int)nudStock.Value;
             _product.Description = txtDescription.Text.Trim();
 
+            // Обработка фото
             if (!string.IsNullOrEmpty(_currentPhotoPath))
             {
+                // Удаляем старое фото, если оно существует и не является заглушкой
+                if (!isNew && !string.IsNullOrEmpty(_product.Photo))
+                {
+                    string oldFullPath = Path.Combine(Application.StartupPath, "ProductPhotos", _product.Photo);
+                    if (File.Exists(oldFullPath) && oldFullPath != _currentPhotoPath)
+                    {
+                        File.Delete(oldFullPath);
+                    }
+                }
+
                 string fileName = Path.GetFileName(_currentPhotoPath);
                 string photoDir = Path.Combine(Application.StartupPath, "ProductPhotos");
-
                 if (!Directory.Exists(photoDir))
                     Directory.CreateDirectory(photoDir);
-
                 string destPath = Path.Combine(photoDir, fileName);
-                File.Copy(_currentPhotoPath, destPath, true);
-                _product.Photo = destPath;
+
+                using (var originalImage = Image.FromFile(_currentPhotoPath))
+                using (var resizedImage = ResizeImage(originalImage, 300, 200))
+                {
+                    resizedImage.Save(destPath);
+                }
+
+                // Сохраняем только имя файла
+                _product.Photo = fileName;
             }
             else if (isNew && pbFoto.Image == null)
             {
                 _product.Photo = null;
             }
 
-            if (isNew)
+            try
             {
-                _productRepo.AddProduct(_product);
-            }
-            else
-            {
-                _productRepo.UpdateProduct(_product);
-            }
+                if (isNew)
+                    _productRepo.AddProduct(_product);
+                else
+                    _productRepo.UpdateProduct(_product);
 
-            DialogResult = DialogResult.OK;
-            Close();
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при сохранении: " + ex.Message, "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnLoadPhoto_Click(object sender, EventArgs e)
@@ -154,7 +231,10 @@ namespace Main_Form
                     {
                         if (pbFoto.Image != null)
                             pbFoto.Image.Dispose();
-                        pbFoto.Image = Image.FromFile(_currentPhotoPath);
+                        using (var originalImage = Image.FromFile(_currentPhotoPath))
+                        {
+                            pbFoto.Image = ResizeImage(originalImage, 300, 200);
+                        }
                     }
                     catch (Exception ex)
                     {

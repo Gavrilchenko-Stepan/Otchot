@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MyLib;
+using MyLib.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,15 +10,20 @@ namespace Main_Form
 {
     internal static class Program
     {
-        /// <summary>
-        /// Главная точка входа для приложения.
-        /// </summary>
+        public static User CurrentUser { get; set; }
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LoginForm());
+
+            // Показываем форму входа как диалог
+            LoginForm loginForm = new LoginForm();
+            if (loginForm.ShowDialog() == DialogResult.OK)
+            {
+                // Если вход успешен (или выбран гость), запускаем главную форму
+                Application.Run(new MainForm(CurrentUser, new ProductRepository(new Database())));
+            }
         }
     }
 }

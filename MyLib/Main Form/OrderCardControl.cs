@@ -15,50 +15,61 @@ namespace Main_Form
     public partial class OrderCardControl : UserControl
     {
         private Order _order;
-        public event EventHandler<Order> CardClicked;
+        private Color _originalBackColor;
+        public event EventHandler<Order> CardClicked;        // одиночный клик (выделение)
+        public event EventHandler<Order> CardDoubleClicked;  // двойной клик (действие)
 
         public OrderCardControl()
         {
             InitializeComponent();
 
-            // Делаем всю карточку кликабельной
             this.Click += OrderCardControl_Click;
-            panel1.Click += (s, e) => OrderCardControl_Click(this, e);
-            panel2.Click += (s, e) => OrderCardControl_Click(this, e);
+            this.DoubleClick += OrderCardControl_DoubleClick;
 
-            // Все дочерние элементы тоже кликабельны
+            panel1.Click += (s, e) => OrderCardControl_Click(this, e);
+            panel1.DoubleClick += (s, e) => OrderCardControl_DoubleClick(this, e);
+            panel2.Click += (s, e) => OrderCardControl_Click(this, e);
+            panel2.DoubleClick += (s, e) => OrderCardControl_DoubleClick(this, e);
+
             foreach (Control ctrl in panel1.Controls)
+            {
                 ctrl.Click += (s, e) => OrderCardControl_Click(this, e);
+                ctrl.DoubleClick += (s, e) => OrderCardControl_DoubleClick(this, e);
+            }
             foreach (Control ctrl in panel2.Controls)
+            {
                 ctrl.Click += (s, e) => OrderCardControl_Click(this, e);
+                ctrl.DoubleClick += (s, e) => OrderCardControl_DoubleClick(this, e);
+            }
         }
 
-        /// <summary>
-        /// Заполняет карточку данными заказа
-        /// </summary>
-        /// <param name="order">Заказ</param>
-        /// <param name="pickupAddress">Адрес пункта выдачи (уже готовый текст)</param>
-        public void SetOrder(Order order, string pickupAddress, string pickupAddress1)
+        public void SetOrder(Order order, string pickupAddress)
         {
             _order = order;
-
-            // Заполняем текстовые поля
             lblOrderArticle.Text = "Артикул заказа: " + order.OrderNumber;
             lblStatus.Text = "Статус заказа: " + order.Status;
             lblPickupAddress.Text = "Адрес пункта выдачи: " + pickupAddress;
             lblOrderDate.Text = "Дата заказа: " + order.OrderDate.ToString("dd.MM.yyyy");
+            lblDeliveryDate.Text = order.DeliveryDate.HasValue
+                ? "Дата доставки: " + order.DeliveryDate.Value.ToString("dd.MM.yyyy")
+                : "Дата доставки: не указана";
 
-            // Дата доставки – просто меняем текст существующей метки
-            if (order.DeliveryDate.HasValue)
-                lblDeliveryDate.Text = "Дата доставки: " + order.DeliveryDate.Value.ToString("dd.MM.yyyy");
-            else
-                lblDeliveryDate.Text = "Дата доставки: не указана";
+            _originalBackColor = this.BackColor;
+        }
+
+        public void SetSelected(bool selected)
+        {
+            this.BackColor = selected ? Color.LightYellow : _originalBackColor;
         }
 
         private void OrderCardControl_Click(object sender, EventArgs e)
         {
-            // Вызываем событие при клике на карточку
             CardClicked?.Invoke(this, _order);
+        }
+
+        private void OrderCardControl_DoubleClick(object sender, EventArgs e)
+        {
+            CardDoubleClicked?.Invoke(this, _order);
         }
     }
 }

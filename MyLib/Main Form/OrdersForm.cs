@@ -22,6 +22,8 @@ namespace Main_Form
         private List<Order> _allOrders;
         private List<PickupPoint> _pickupPoints;
         private List<User> _customers;
+        private Order _selectedOrder;
+        private OrderCardControl _selectedOrderCard; // текущая выделенная карточка
 
         public OrdersForm(User user)
         {
@@ -34,18 +36,9 @@ namespace Main_Form
             _userRepo = new UserRepository(db);
             this.Text = "Управление заказами";
 
-            if (_currentUser.IsAdmin)
-            {
-                btnAddOrder.Visible = true;
-                btnEditOrder.Visible = true;
-                btnDeleteOrder.Visible = true;
-            }
-            else
-            {
-                btnAddOrder.Visible = false;
-                btnEditOrder.Visible = false;
-                btnDeleteOrder.Visible = false;
-            }
+            btnAddOrder.Visible = _currentUser.IsAdmin;
+            btnEditOrder.Visible = _currentUser.IsAdmin;
+            btnDeleteOrder.Visible = _currentUser.IsAdmin;
         }
 
         private void OrdersForm_Load(object sender, EventArgs e)
@@ -55,16 +48,8 @@ namespace Main_Form
             LoadOrders();
         }
 
-        private void LoadPickupPoints()
-        {
-            _pickupPoints = _pickupRepo.GetAllPickupPoints();
-        }
-
-        private void LoadCustomers()
-        {
-            _customers = _userRepo.GetUsersByRole("Авторизированный клиент");
-        }
-
+        private void LoadPickupPoints() => _pickupPoints = _pickupRepo.GetAllPickupPoints();
+        private void LoadCustomers() => _customers = _userRepo.GetUsersByRole("Авторизированный клиент");
         private void LoadOrders()
         {
             _allOrders = _orderRepo.GetAllOrders();
@@ -86,94 +71,52 @@ namespace Main_Form
             {
                 filtered = filtered.Where(o =>
                     o.OrderNumber.ToString().Contains(search) ||
-                    (GetCustomerName(o.CustomerId) != null && GetCustomerName(o.CustomerId).ToLower().Contains(search)));
+                    (GetCustomerName(o.CustomerId)?.ToLower().Contains(search) ?? false));
             }
 
             flowLayoutPanelOrders.Controls.Clear();
+            _selectedOrderCard = null;
+
             foreach (var order in filtered)
             {
                 var card = new OrderCardControl();
-
-                string customerName = GetCustomerName(order.CustomerId);
-                if (customerName == null)
-                    customerName = "Неизвестно";
-
-                string pickupAddress = GetPickupAddress(order.PickupPointId);
-                if (pickupAddress == null)
-                    pickupAddress = "Не указан";
-
-                card.SetOrder(order, customerName, pickupAddress);
+                string pickupAddress = GetPickupAddress(order.PickupPointId) ?? "Не указан";
+                card.SetOrder(order, pickupAddress);
 
                 Order currentOrder = order;
-                card.CardClicked += (s, ord) => ShowOrderDetails(ord);
 
+                // Одиночный клик – выделение
+                card.CardClicked += (s, ord) =>
+                {
+                    if (_selectedOrderCard != null && _selectedOrderCard != card)
+                        _selectedOrderCard.SetSelected(false);
+                    card.SetSelected(true);
+                    _selectedOrderCard = card;
+                    _selectedOrder = ord;
+                };
+
+                // Двойной клик – редактирование (только для администратора)
                 if (_currentUser.IsAdmin)
                 {
-                    card.CardClicked += (s, ord) => OpenEditOrder(ord);
+                    card.CardDoubleClicked += (s, ord) => OpenEditOrder(ord);
                 }
 
                 flowLayoutPanelOrders.Controls.Add(card);
             }
         }
 
-        private string GetCustomerName(int? customerId)
-        {
-            if (!customerId.HasValue)
-                return null;
+        private string GetCustomerName(int? customerId) =>
+            customerId.HasValue ? _customers.FirstOrDefault(c => c.Id == customerId)?.FullName : null;
 
-            foreach (var customer in _customers)
-            {
-                if (customer.Id == customerId.Value)
-                    return customer.FullName;
-            }
-            return null;
-        }
-
-        private string GetPickupAddress(int? pointId)
-        {
-            if (!pointId.HasValue)
-                return null;
-
-            foreach (var point in _pickupPoints)
-            {
-                if (point.Id == pointId.Value)
-                    return point.Address;
-            }
-            return null;
-        }
-
-        private void ShowOrderDetails(Order order)
-        {
-            var items = _orderItemRepo.GetItemsByOrderId(order.Id);
-            string details = "Заказ №" + order.OrderNumber + "\n" +
-                             "Статус: " + order.Status + "\n" +
-                             "Дата заказа: " + order.OrderDate.ToString("dd.MM.yyyy") + "\n";
-
-            if (order.DeliveryDate.HasValue)
-                details += "Дата доставки: " + order.DeliveryDate.Value.ToString("dd.MM.yyyy") + "\n";
-            else
-                details += "Дата доставки: не указана\n";
-
-            details += "Пункт выдачи: " + GetPickupAddress(order.PickupPointId) + "\n";
-            details += "Клиент: " + GetCustomerName(order.CustomerId) + "\n";
-            details += "Код: " + order.PickupCode + "\n\nТовары:\n";
-
-            foreach (var item in items)
-            {
-                details += item.ProductArticle + " – " + item.Quantity + " шт.\n";
-            }
-
-            MessageBox.Show(details, "Информация о заказе", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
+        private string GetPickupAddress(int? pointId) =>
+            pointId.HasValue ? _pickupPoints.FirstOrDefault(p => p.Id == pointId)?.Address : null;
 
         private void OpenEditOrder(Order order)
         {
             using (var form = new OrderEditForm(order))
             {
                 if (form.ShowDialog() == DialogResult.OK)
-                {
                     LoadOrders();
-                }
             }
         }
 
@@ -182,30 +125,45 @@ namespace Main_Form
             using (var form = new OrderEditForm(null))
             {
                 if (form.ShowDialog() == DialogResult.OK)
-                {
                     LoadOrders();
-                }
             }
         }
 
         private void btnEditOrder_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Выберите заказ в списке и нажмите на него для редактирования.");
+            MessageBox.Show("Выберите заказ в списке и дважды кликните на его карточку для редактирования.",
+                "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btnDeleteOrder_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Функция удаления будет реализована позже.");
+            if (_selectedOrder == null)
+            {
+                MessageBox.Show("Выберите заказ для удаления (одинарный клик на его карточку).", "Информация",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult result = MessageBox.Show($"Удалить заказ №{_selectedOrder.OrderNumber}?",
+                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    _orderRepo.DeleteOrder(_selectedOrder.Id);
+                    LoadOrders();
+                    _selectedOrder = null;
+                    _selectedOrderCard = null;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка при удалении: " + ex.Message, "Ошибка",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
-        private void cmbStatusFilter_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ApplyFilter();
-        }
-
-        private void txtSearch_TextChanged(object sender, EventArgs e)
-        {
-            ApplyFilter();
-        }
+        private void cmbStatusFilter_SelectedIndexChanged(object sender, EventArgs e) => ApplyFilter();
+        private void txtSearch_TextChanged(object sender, EventArgs e) => ApplyFilter();
     }
 }
